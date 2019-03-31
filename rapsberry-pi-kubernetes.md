@@ -11,20 +11,20 @@ sudo usermod -aG docker $USER
 
 `sudo swapoff -a`
 
-Add `cgroup_enable=cpuset cgroup_memory=1 cgroup_enable=memory` to the end of `/boot/cmdline.txt`.
+Add `cgroup_enable=cpuset cgroup_enable=memory cgroup_memory=1` to the end of `/boot/cmdline.txt`.
 
 Use `systemd` for the `cgroupdriver`.  Might need to manually create this file in vim.
 
-    cat > /etc/docker/daemon.json <<EOF
-    {
-      "exec-opts": ["native.cgroupdriver=systemd"],
-      "log-driver": "json-file",
-      "log-opts": {
-        "max-size": "100m"
-      },
-      "storage-driver": "overlay2"
-    }
-    EOF
+cat > /etc/docker/daemon.json <<EOF
+{
+  "exec-opts": ["native.cgroupdriver=systemd"],
+  "log-driver": "json-file",
+  "log-opts": {
+    "max-size": "100m"
+  },
+  "storage-driver": "overlay2"
+}
+EOF
 
     mkdir -p /etc/systemd/system/docker.service.d
 
