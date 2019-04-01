@@ -31,6 +31,8 @@ EOF'
 echo "Cleaning stale apt packages"
 sudo apt autoremove -y
 
+sudo sysctl net.bridge.bridge-nf-call-iptables=1
+
 echo ""
 echo "The system now needs to reboot.  Please manually reboot the computer."
 echo ""
