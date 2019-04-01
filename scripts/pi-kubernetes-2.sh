@@ -26,4 +26,4 @@ sudo sed -i '/[/]swapfile/ s/^/#/' /etc/fstab
 sudo swapoff -a
 
 echo "The system now needs to reboot.  Please manually reboot the computer."
-echo "Setup can continue in pi-kubernetes-2.sh"
+echo "Setup can continue in pi-kubernetes-3.sh"
