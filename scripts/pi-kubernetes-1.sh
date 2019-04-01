@@ -20,9 +20,11 @@ echo "Enabling passwordless sudo"
 echo "brennan ALL=(ALL) NOPASSWD: ALL" | sudo tee -a /etc/sudoers
 
 echo "------------------------------------"
-echo "For some strange reason the automation didn't work but manually did"
-echo "Might want to perform this step manually."
-sudo sed -i 's/$/ cgroup_enable=cpuset cgroup_memory=1 cgroup_enable=memory/' /boot/cmdline.txt
+echo "For some strange reason the automation didn't work but manually did."
+echo ""
 
-# Reboot
-echo "Reboot here"
+echo "Please add cgroup_enable=cpuset cgroup_memory=1 cgroup_enable=memory to /boot/cmdline.txt"
+#sudo sed -i 's/$/ cgroup_enable=cpuset cgroup_memory=1 cgroup_enable=memory/' /boot/cmdline.txt
+
+echo ""
+echo "Then reboot"
