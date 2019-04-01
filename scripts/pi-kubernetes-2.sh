@@ -1,37 +1,29 @@
-# Prep for Kubernetes
-echo "Adding Kubernetes apt repo"
-curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -
-sudo apt-add-repository "deb http://apt.kubernetes.io/ kubernetes-xenial main"
-sudo apt update
+# Docker
+echo "Installing Docker"
+curl -sSL get.docker.com | sh
+sudo usermod -aG docker brennan
 
-echo "Installing kubeadm"
-sudo apt install -y kubeadm
 
-echo "Prefetching Kubernetes images"
-sudo kubeadm config images pull -v3
-
-# Convience helpers
-echo "Adding convenience helpers to ~/.bashrc"
-bash -c 'cat << EOF >> ~/.bashrc
-
-# Kubernetes convience aliases
-alias k="kubectl"
-alias kg="kubectl get"
-alias kd="kubectl describe"
-alias ka="kubectl apply"
-alias g="kubectl get"
-
-function sc() {
-  CONFIG_FILE=~/kubeconfigs/$1.yml
-  echo "Setting KUBECONFIG to $CONFIG_FILE"
-  export KUBECONFIG=$CONFIG_FILE
+sudo bash -c 'cat << EOF > /etc/docker/daemon.json
+{
+  "exec-opts": ["native.cgroupdriver=systemd"],
+  "log-driver": "json-file",
+  "log-opts": {
+    "max-size": "100m"
+  },
+  "storage-driver": "overlay2"
 }
 EOF'
 
-echo "Cleaning stale apt packages"
-sudo apt autoremove -y
+sudo mkdir -p /etc/systemd/system/docker.service.d
 
-echo ""
+sudo systemctl daemon-reload
+sudo systemctl restart docker
+
+# Swapfile
+echo "Disabling swapfile"
+sudo sed -i '/[/]swapfile/ s/^/#/' /etc/fstab
+sudo swapoff -a
+
 echo "The system now needs to reboot.  Please manually reboot the computer."
-echo ""
-echo "Once the system is rebooted, run the 'kubeadm join' command saved from the master."
+echo "Setup can continue in pi-kubernetes-2.sh"
