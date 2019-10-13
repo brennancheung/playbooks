@@ -27,6 +27,34 @@ Launch the virtual machine manager using `virt-manager`
 `sudo apt install vagrant -y`
 
 
+#### How to set up bridged networking for the VM's
+
+Take a look at `/etc/netplan/`.  If you are using a cloud-init you will need to disable
+overwritting of the netplan files by following the instructions in the netplan file.
+
+Read through https://fabianlee.org/2019/04/01/kvm-creating-a-bridged-network-with-netplan-on-ubuntu-bionic/
+
+I created the following config in my netplan:
+
+    network:
+        version: 2
+        ethernets:
+            enp0s3:
+                dhcp4: false
+
+        bridges:
+            br0:
+                interfaces: [enp0s3]
+                addresses: [10.0.0.103/24]
+                dhcp4: true
+
+I had to give the bridge my old IP that is hard-coded instead of going through DHCP.  I should probably make
+sure the chosen IP will not be re-assigned to another host somehow but I think it will be fine for my purposes.
+
+Other links I found:
+  * https://amoldighe.github.io/2017/12/30/kvm-bridge-networking/
+
+
 #### Troubleshooting
 
 If `virt-manager` is not working try some of the following:
@@ -58,4 +86,5 @@ Also:
 https://en.wikibooks.org/wiki/QEMU/Networking
 
 https://www.linuxjournal.com/content/linux-advanced-routing-tutorial
+
 

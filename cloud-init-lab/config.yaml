@@ -1,0 +1,23 @@
+#cloud-config
+network:
+    version: 2
+    ethernets:
+        ens2:
+            dhcp4: false
+            dhcp6: false
+            addresses: [10.0.0.40/24]
+            gateway4: 10.0.0.1
+password: secret # for the 'ubuntu' user in case we can't SSH in
+chpasswd: { expire: false }
+ssh_pwauth: true
+users:
+    - default
+    - name: brennan
+      ssh_import_id: gh:brennancheung
+      sudo: ALL=(ALL) NOPASSWD:ALL
+hostname: vm
+runcmd:
+    - [ sh, -xc, "echo Here is the network config for your instance" ]
+    - [ ip, a ]
+
+final_message: "Cloud init is done.  Woohoo!"
