@@ -1,12 +1,4 @@
 #cloud-config
-network:
-    version: 2
-    ethernets:
-        ens2:
-            dhcp4: false
-            dhcp6: false
-            addresses: [10.0.0.40/24]
-            gateway4: 10.0.0.1
 password: secret # for the 'ubuntu' user in case we can't SSH in
 chpasswd: { expire: false }
 ssh_pwauth: true
