@@ -5,11 +5,15 @@ ssh_pwauth: true
 users:
     - default
     - name: brennan
-      ssh_import_id: gh:brennancheung
-      sudo: ALL=(ALL) NOPASSWD:ALL
-hostname: vm
+      ssh-authorized-keys:
+        - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDsO6O4057CXp+W9MApurbX/rJ5fxBqkp2L+Kx4/YX4MPDc6QFEZbemLtkqPxRLbs16zJvncAVyg/ZxBobZpjKYcS9Yb9aFHpdZIgXVcQDo82TdppP7NKE9OnzAK7bpmQJnDxu1lJ+bXyHa8IAupZ+U/jK78Js1G4etfNDd4jEQ0wqvWheCTNNfbwKR1WRAV9+QFW4thxJ/a+kA6UmVCPEFqhy0uHZw6f/ojXEK+tOww/skQTwlKtqovX81qXiE1bgwFuNsjLmSSn0EThqZxsSOm48C2kSGW+sO06whVm/XpQ0VTUDE1BG303XQbcWpEZmbwIytbowe7Z2k/neuFpX9 brennan@Brennans-MacBook-Pro.local
+      sudo: ['ALL=(ALL) NOPASSWD:ALL']
+      groups: sudo
+      shell: /bin/bash
+hostname: node1
 runcmd:
     - [ sh, -xc, "echo Here is the network config for your instance" ]
     - [ ip, a ]
 
 final_message: "Cloud init is done.  Woohoo!"
+#      ssh_import_id: gh:brennancheung
