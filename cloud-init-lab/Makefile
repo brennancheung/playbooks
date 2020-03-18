@@ -28,9 +28,6 @@ build:
 
 	cloud-localds -v --network-config=network-config-v2.yaml $(SEED_IMAGE_FILE) user-data.yaml
 
-  # ignore network-config for Ubuntu16.04
-	# cloud-localds -v $(SEED_IMAGE_FILE) user-data.yaml
-
 	cp $(CLOUD_IMAGE_FILE) $(INSTANCE_NAME).img
 	qemu-img resize $(INSTANCE_NAME).img $(DISK_SIZE)
 
