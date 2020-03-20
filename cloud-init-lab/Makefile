@@ -15,27 +15,8 @@ SEED_IMAGE_FILE := "$(INSTANCE_NAME)-seed.img"
 NET_CONFIG_FILE := network-config-v2.yaml
 NET_CONFIG_TEMPLATE := network-config-v2.template.yaml
 
+DISK_IMAGE_FILE = "$(INSTANCE_NAME).img"
 
-download:
-	wget $(CLOUD_IMAGE_URL)
-
-clean:
-	@echo "Removing build artifacts"
-	-@sudo rm -f $(SEED_IMAGE_FILE) 2>/dev/null
-	-@virsh destroy $(INSTANCE_NAME) 2>/dev/null || true
-	-@virsh undefine $(INSTANCE_NAME) 2>/dev/null || true
-	-@sudo rm -f $(INSTANCE_NAME).img
-
-build: 
-	@echo "Building cloud config drive"
-
-  # Configure the instance IP
-	sed 's/__IPADDRESS__/${IP}/g' ${NET_CONFIG_TEMPLATE} > ${NET_CONFIG_FILE}
-	cloud-localds -v --network-config=$(NET_CONFIG_FILE) $(SEED_IMAGE_FILE) user-data.yaml
-
-  # Build the seed image
-	cp $(CLOUD_IMAGE_FILE) $(INSTANCE_NAME).img
-	qemu-img resize $(INSTANCE_NAME).img $(DISK_SIZE)
 
 run: build
 	@echo "Spawning instance $(INSTANCE_NAME)"
@@ -50,3 +31,29 @@ run: build
 		--virt-type kvm \
 		--graphics none \
 		--network bridge=br0
+
+build: $(SEED_IMAGE_FILE) $(DISK_IMAGE_FILE)
+
+$(SEED_IMAGE_FILE): $(NET_CONFIG_FILE)
+	# Build the seed image
+	cloud-localds -v --network-config=$(NET_CONFIG_FILE) $(SEED_IMAGE_FILE) user-data.yaml
+
+$(NET_CONFIG_FILE):
+	# Build net-config-v2.yaml
+	sed 's/__IPADDRESS__/${IP}/g' $(NET_CONFIG_TEMPLATE) > $(NET_CONFIG_FILE)
+
+$(DISK_IMAGE_FILE):
+	@echo "Build main disk image"
+	cp $(CLOUD_IMAGE_FILE) $(DISK_IMAGE_FILE)
+	qemu-img resize $(DISK_IMAGE_FILE) $(DISK_SIZE)
+
+download:
+	wget $(CLOUD_IMAGE_URL)
+
+clean:
+	@echo "Removing build artifacts"
+	-@sudo rm -f $(SEED_IMAGE_FILE) 2>/dev/null
+	-@virsh destroy $(INSTANCE_NAME) 2>/dev/null || true
+	-@virsh undefine $(INSTANCE_NAME) 2>/dev/null || true
+	-@sudo rm -f $(INSTANCE_NAME).img
+
