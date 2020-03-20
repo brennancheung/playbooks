@@ -10,7 +10,7 @@ users:
       sudo: ['ALL=(ALL) NOPASSWD:ALL']
       groups: sudo
       shell: /bin/bash
-hostname: node1
+hostname: __HOSTNAME__
 runcmd:
     - [ sh, -xc, "echo Here is the network config for your instance" ]
     - [ ip, a ]
