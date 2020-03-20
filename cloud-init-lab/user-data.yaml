@@ -14,6 +14,10 @@ hostname: node1
 runcmd:
     - [ sh, -xc, "echo Here is the network config for your instance" ]
     - [ ip, a ]
+    - [ sh, -xc, "echo ===== Downloading PF9 installer =====" ]
+    - [ sh, -xc, "curl -sL http://10.0.0.107/pf9-install.sh > /home/brennan/pf9-install.sh" ]
+    - [ sh, -xc, "chown brennan:brennan /home/brennan/pf9-install.sh" ]
+    - [ sh, -xc, "chmod 777 /home/brennan/pf9-install.sh" ]
 
 final_message: "Cloud init is done.  Woohoo!"
 #      ssh_import_id: gh:brennancheung
