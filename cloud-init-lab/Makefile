@@ -1,8 +1,8 @@
-all: clean build run
-
 IP := 10.0.0.41
 INSTANCE_NAME := node1.mh1.dev
 DISK_SIZE := 40G
+MEMORY=16384
+VCPUS=16
 
 # CLOUD_IMAGE_FILE = "bionic-server-cloudimg-amd64.img"
 # CLOUD_IMAGE_BASE_URL := "http://cloud-images.ubuntu.com/bionic/current"
@@ -22,9 +22,9 @@ run: build
 	@echo "Spawning instance $(INSTANCE_NAME)"
 	virt-install \
 		--name $(INSTANCE_NAME) \
-		--memory 16384 \
-		--vcpus 16 \
-		--disk $(INSTANCE_NAME).img,device=disk,bus=virtio,size=40 \
+		--memory $(MEMORY) \
+		--vcpus $(VCPUS) \
+		--disk $(INSTANCE_NAME).img,device=disk,bus=virtio \
 		--disk $(SEED_IMAGE_FILE),device=cdrom \
 		--os-type linux \
 		--os-variant ubuntu16.04 \
