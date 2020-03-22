@@ -39,24 +39,24 @@ build: | $(BUILD_DIR) $(SEED_IMAGE_FILE) $(DISK_IMAGE_FILE)
 
 $(BUILD_DIR):
 	$(call spacing,"Create folder: $(INSTANCE_NAME)")
-	mkdir $(BUILD_DIR) || true
+	mkdir -p $@
 
-seed $(SEED_IMAGE_FILE): | $(BUILD_DIR) $(NET_CONFIG_FILE) $(USER_DATA_FILE)
+$(SEED_IMAGE_FILE): | $(BUILD_DIR) $(NET_CONFIG_FILE) $(USER_DATA_FILE)
 	$(call spacing,"Build cloud-init image")
-	cloud-localds -v --network-config=$(NET_CONFIG_FILE) $(SEED_IMAGE_FILE) $(USER_DATA_FILE)
+	cloud-localds -v --network-config=$(NET_CONFIG_FILE) $@ $(USER_DATA_FILE)
 
-net $(NET_CONFIG_FILE): | $(BUILD_DIR)
+$(NET_CONFIG_FILE): | $(BUILD_DIR)
 	$(call spacing,"Build net config: $(IP)")
-	sed 's/__IPADDRESS__/${IP}/g' $(NET_CONFIG_TEMPLATE) > $(NET_CONFIG_FILE)
+	sed 's/__IPADDRESS__/${IP}/g' $(NET_CONFIG_TEMPLATE) > $@
 
-image $(DISK_IMAGE_FILE): | $(BUILD_DIR)
+$(DISK_IMAGE_FILE): | $(BUILD_DIR)
 	$(call spacing,"Build main disk image: $(DISK_SIZE)")
 	cp $(CLOUD_IMAGE_FILE) $(DISK_IMAGE_FILE)
-	qemu-img resize $(DISK_IMAGE_FILE) $(DISK_SIZE)
+	qemu-img resize $@ $(DISK_SIZE)
 
 $(USER_DATA_FILE): | $(BUILD_DIR)
 	$(call spacing,"Build user-data: $(IP)")
-	sed 's/__HOSTNAME__/$(INSTANCE_NAME)/g' $(USER_DATA_TEMPLATE) > $(USER_DATA_FILE)
+	sed 's/__HOSTNAME__/$(INSTANCE_NAME)/g' $(USER_DATA_TEMPLATE) > $@
 
 download:
 	if [ ! -r $(CLOUD_IMAGE_FILE) ]; then
