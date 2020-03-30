@@ -5,6 +5,10 @@ ethernets:
         dhcp6: false
         addresses:
           - __IPADDRESS__/24
+          - 10.0.0.50/24
+          - 10.0.0.51/24
+          - 10.0.0.52/24
+          - 10.0.0.53/24
         gateway4: 10.0.0.1
         nameservers:
           addresses:

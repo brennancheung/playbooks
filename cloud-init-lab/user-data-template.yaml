@@ -18,6 +18,7 @@ runcmd:
     - [ sh, -xc, "curl -sL http://10.0.0.107/pf9-install.sh > /home/brennan/pf9-install.sh" ]
     - [ sh, -xc, "chown brennan:brennan /home/brennan/pf9-install.sh" ]
     - [ sh, -xc, "chmod 777 /home/brennan/pf9-install.sh" ]
+    - [ sh, -xc, "echo 'nameserver 8.8.8.8' >> /etc/resolv.conf" ]
 
 final_message: "Cloud init is done.  Woohoo!"
 #      ssh_import_id: gh:brennancheung
