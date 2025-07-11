@@ -1,40 +1,40 @@
 import { streamText, stepCountIs, convertToModelMessages } from 'ai'
-/*
-import { createOpenAI } from "@ai-sdk/openai"
+import { getMCPManager } from '@/lib/mcp-manager'
+import { loadMCPServersConfig } from '@/config/mcp-servers'
 
-// Create OpenAI provider with explicit API key
-const openai = createOpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-})
-*/
+// Initialize MCP manager once
+let mcpInitialized = false
 
-import { experimental_createMCPClient as createMCPClient } from 'ai'
-import { Experimental_StdioMCPTransport as StdioMCPTransport } from 'ai/mcp-stdio'
+async function initializeMCPIfNeeded() {
+  if (mcpInitialized) return
 
-// MCP client management
-type MCPClient = Awaited<ReturnType<typeof createMCPClient>>
-
-let mcpClient: MCPClient | null
+  try {
+    console.log('Initializing MCP connections...')
+    const mcpManager = getMCPManager()
+    const serversConfig = loadMCPServersConfig()
+    
+    await mcpManager.initialize(serversConfig)
+    mcpInitialized = true
+    
+    const connections = mcpManager.getActiveConnections()
+    console.log(`MCP initialized with ${connections.length} active servers:`)
+    connections.forEach(conn => {
+      console.log(`  - ${conn.name}: ${conn.tools.length} tools`)
+    })
+  } catch (error) {
+    console.error('Failed to initialize MCP:', error)
+    // Don't set initialized to true so we can retry
+  }
+}
 
 async function getMCPTools() {
   try {
-    // If we don't have a client, create one
-    if (!mcpClient) {
-      console.log('Creating new MCP client...')
-      mcpClient = await createMCPClient({
-        transport: new StdioMCPTransport({
-          command: 'npx',
-          args: ['-y', '@modelcontextprotocol/server-filesystem', './'],
-        }),
-      })
-      console.log('MCP client created successfully')
-    }
-    return await mcpClient.tools()
+    await initializeMCPIfNeeded()
+    const mcpManager = getMCPManager()
+    return mcpManager.getAllTools()
   } catch (error) {
-    console.error('Failed to create/get MCP tools:', error)
-    // Reset to null so we'll retry on next request
-    mcpClient = null
-    return null
+    console.error('Failed to get MCP tools:', error)
+    return {}
   }
 }
 
@@ -43,13 +43,15 @@ export async function POST(req: Request) {
 
   // Try to get MCP tools, but continue without them if unavailable
   const mcpTools = await getMCPTools()
+  
+  console.log(`Processing chat request with ${Object.keys(mcpTools).length} available tools`)
 
   const result = streamText({
     model: 'anthropic/claude-3.7-sonnet',
     messages: convertToModelMessages(messages),
     temperature: 0.7,
-    tools: mcpTools || {},
-    stopWhen: stepCountIs(15),
+    tools: mcpTools as Parameters<typeof streamText>[0]['tools'],
+    stopWhen: stepCountIs(25),
   })
 
   return result.toUIMessageStreamResponse()
