@@ -50,7 +50,7 @@ export const defaultMCPServers: MCPServersConfig = {
       FIRECRAWL_API_KEY: process.env.FIRECRAWL_API_KEY || ''
     },
     description: 'Web scraping and crawling capabilities',
-    enabled: true
+    enabled: !!process.env.FIRECRAWL_API_KEY // Automatically enabled when API key is present
   }
 }
 

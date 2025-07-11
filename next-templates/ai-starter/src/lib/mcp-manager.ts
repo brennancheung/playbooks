@@ -57,12 +57,21 @@ export class MCPManager {
     console.log(`MCP Manager initialized with ${this.connections.size} active connections`)
   }
 
+  isInitialized(): boolean {
+    return this.initialized
+  }
+
   getActiveConnections(): MCPConnection[] {
     return Array.from(this.connections.values())
   }
 
   getConnection(name: string): MCPConnection | undefined {
     return this.connections.get(name)
+  }
+  
+  getConnectionTools(name: string): Record<string, unknown> | undefined {
+    const connection = this.connections.get(name)
+    return connection?.tools
   }
 
   getAllTools() {

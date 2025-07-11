@@ -1,35 +1,10 @@
 import { streamText, stepCountIs, convertToModelMessages } from 'ai'
 import { getMCPManager } from '@/lib/mcp-manager'
-import { loadMCPServersConfig } from '@/config/mcp-servers'
-
-// Initialize MCP manager once
-let mcpInitialized = false
-
-async function initializeMCPIfNeeded() {
-  if (mcpInitialized) return
-
-  try {
-    console.log('Initializing MCP connections...')
-    const mcpManager = getMCPManager()
-    const serversConfig = loadMCPServersConfig()
-    
-    await mcpManager.initialize(serversConfig)
-    mcpInitialized = true
-    
-    const connections = mcpManager.getActiveConnections()
-    console.log(`MCP initialized with ${connections.length} active servers:`)
-    connections.forEach(conn => {
-      console.log(`  - ${conn.name}: ${conn.tools.length} tools`)
-    })
-  } catch (error) {
-    console.error('Failed to initialize MCP:', error)
-    // Don't set initialized to true so we can retry
-  }
-}
+import { initializeMCP } from '@/lib/mcp-actions'
 
 async function getMCPTools() {
   try {
-    await initializeMCPIfNeeded()
+    await initializeMCP()
     const mcpManager = getMCPManager()
     return mcpManager.getAllTools()
   } catch (error) {
