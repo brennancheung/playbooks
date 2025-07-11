@@ -1,17 +1,46 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { useChat } from '@ai-sdk/react'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
-import { ScrollArea } from '@/components/ui/scroll-area'
 import { Loader2, Send } from 'lucide-react'
 import { UserMessage, AssistantMessage } from '@/components/chat/ChatMessageComponents'
 
 export default function ChatDemo() {
   const { messages, sendMessage, status } = useChat()
   const [input, setInput] = useState('')
+  const chatScrollRef = useRef<HTMLDivElement>(null)
+  const debugScrollRef = useRef<HTMLDivElement>(null)
+  const [isUserScrolling, setIsUserScrolling] = useState(false)
+  const [isDebugUserScrolling, setIsDebugUserScrolling] = useState(false)
+
+  // Auto-scroll effect for chat
+  useEffect(() => {
+    if (chatScrollRef.current && !isUserScrolling) {
+      chatScrollRef.current.scrollTop = chatScrollRef.current.scrollHeight
+    }
+  }, [messages, isUserScrolling])
+
+  // Auto-scroll effect for debug view
+  useEffect(() => {
+    if (debugScrollRef.current && !isDebugUserScrolling) {
+      debugScrollRef.current.scrollTop = debugScrollRef.current.scrollHeight
+    }
+  }, [messages, isDebugUserScrolling])
+
+  const handleChatScroll = (e: React.UIEvent<HTMLDivElement>) => {
+    const element = e.currentTarget
+    const isAtBottom = Math.abs(element.scrollHeight - element.scrollTop - element.clientHeight) < 10
+    setIsUserScrolling(!isAtBottom)
+  }
+
+  const handleDebugScroll = (e: React.UIEvent<HTMLDivElement>) => {
+    const element = e.currentTarget
+    const isAtBottom = Math.abs(element.scrollHeight - element.scrollTop - element.clientHeight) < 10
+    setIsDebugUserScrolling(!isAtBottom)
+  }
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -19,16 +48,24 @@ export default function ChatDemo() {
 
     sendMessage({ text: input })
     setInput('')
+    // Reset scroll state when sending a new message
+    setIsUserScrolling(false)
+    setIsDebugUserScrolling(false)
   }
 
   return (
-    <div className="container mx-auto max-w p-4">
+    <div className="container mx-auto max-w-7xl p-4">
       <h1 className="text-3xl font-bold mb-6">Streaming Chat Demo</h1>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)] gap-6">
         <Card className="min-h-[70vh] max-h-[80vh] flex flex-col">
-          <ScrollArea className="flex-1 p-4 overflow-auto">
-            {messages.length === 0 ? (
+          <div className="flex-1 overflow-hidden relative">
+            <div 
+              ref={chatScrollRef}
+              onScroll={handleChatScroll}
+              className="h-full overflow-y-auto p-4"
+            >
+              {messages.length === 0 ? (
               <div className="text-center text-muted-foreground py-8">
                 Start a conversation by typing a message below
               </div>
@@ -52,7 +89,8 @@ export default function ChatDemo() {
                 )}
               </div>
             )}
-          </ScrollArea>
+            </div>
+          </div>
 
           <form onSubmit={handleSubmit} className="border-t p-4">
             <div className="flex gap-2">
@@ -93,20 +131,28 @@ export default function ChatDemo() {
             <h2 className="text-lg font-semibold">Debug View</h2>
             <p className="text-sm text-muted-foreground">Raw message structure</p>
           </div>
-          <ScrollArea className="flex-1 p-4">
-            <div className="space-y-4">
-              {messages.map((message) => (
-                <div key={message.id} className="rounded border p-3">
-                  <div className="mb-2 text-sm font-medium">
-                    Role: {message.role} | Parts: {message.parts.length}
+          <div className="flex-1 overflow-hidden relative">
+            <div 
+              ref={debugScrollRef}
+              onScroll={handleDebugScroll}
+              className="h-full overflow-y-auto p-4"
+            >
+              <div className="space-y-4">
+                {messages.map((message) => (
+                  <div key={message.id} className="rounded border p-3 overflow-hidden">
+                    <div className="mb-2 text-sm font-medium">
+                      Role: {message.role} | Parts: {message.parts.length}
+                    </div>
+                    <div className="overflow-x-auto">
+                      <pre className="text-xs">
+                        <code>{JSON.stringify(message.parts, null, 2)}</code>
+                      </pre>
+                    </div>
                   </div>
-                  <pre className="overflow-auto text-xs">
-                    <code>{JSON.stringify(message.parts, null, 2)}</code>
-                  </pre>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
-          </ScrollArea>
+          </div>
         </Card>
       </div>
     </div>
